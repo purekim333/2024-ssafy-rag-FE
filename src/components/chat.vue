@@ -6,6 +6,10 @@
         <button @click="toggleDarkMode" class="toggle-btn">
           {{ darkMode ? 'Light Mode' : 'Dark Mode' }}
         </button>
+        <button @click="startNewChat" class="new-chat-btn">
+          <PlusIcon class="icon" />
+          + New Chat
+        </button>
       </header>
       <div class="chat-box">
         <ul>
@@ -18,7 +22,8 @@
               <div
                 :class="['avatar', msg.role === 'user' ? 'user-avatar' : 'assistant-avatar']"
               >
-                {{ msg.role === 'user' ? 'Q' : 'A' }}
+                <User v-if="msg.role === 'user'" class="icon" />
+                <Bot v-else class="icon" />
               </div>
               <div
                 class="message"
@@ -47,7 +52,7 @@
 import { ref } from "vue";
 import axios from "axios";
 import { useCounterStore } from "@/stores/counter";
-import { SendIcon } from "lucide-vue-next";
+import { SendIcon, User, Bot } from "lucide-vue-next";
 import { marked } from "marked";
 
 // 서버 URL 설정
@@ -86,6 +91,13 @@ const sendMessage = async () => {
   userMessage.value = ""; // 입력 필드 초기화
 };
 
+const startNewChat = () => {
+  // 메시지 배열 초기화
+  messages.value = [];
+  userMessage.value = "";
+  console.log("Chat has been reset.");
+};
+
 const getCurrentTime = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -95,9 +107,12 @@ const getCurrentTime = () => {
 const renderMarkdown = (text) => {
   return marked(text, { sanitize: true }); // XSS 방지를 위해 sanitize 옵션 사용
 };
+
+
 </script>
 
 <style scoped>
+
 /* 전체 화면 채우기 */
 .chat-container {
   display: flex;
@@ -108,12 +123,13 @@ const renderMarkdown = (text) => {
   background: var(--background-color);
   color: var(--text-color);
 }
-
+/* 
 .chat-container.light {
-  --background-color: #f3f5fc;
+  --background-color: #ffffff;
   --text-color: #333;
-  --header-bg: #6a5df4;
-  --user-bg: #e0f7fa;
+  --header-bg: #2e2e4a;
+  --user-bg: z#fafafa;
+  --background-outline: #333;
   --assistant-bg: #fff9c4;
 }
 
@@ -123,7 +139,7 @@ const renderMarkdown = (text) => {
   --header-bg: #2e2e4a;
   --user-bg: #4a4a6a;
   --assistant-bg: #3a3a5a;
-}
+} */
 
 .chat-main {
   width: 100%; /* 전체 너비 */
@@ -137,7 +153,7 @@ const renderMarkdown = (text) => {
   background: var(--header-bg);
   color: white;
   text-align: center;
-  padding: 22px;
+  padding: 5px;
   font-weight: bold;
   display: flex;
   justify-content: space-between;
@@ -174,10 +190,11 @@ const renderMarkdown = (text) => {
   background: var(--user-bg);
   padding: 10px 15px;
   border-radius: 12px;
+  border: 1px solid #cdcdcd;
   text-align: left; /* 텍스트 왼쪽 정렬 */
   font-size: 14px;
   line-height: 1.5;
-  max-width: 60%; /* 메시지 최대 너비 설정 */
+  max-width: 80%; /* 메시지 최대 너비 설정 */
   display: inline-block;
 }
 
@@ -196,7 +213,7 @@ const renderMarkdown = (text) => {
 }
 
 .timestamp {
-  font-size: 12px;
+  font-size: 10px;
   color: #aaa;
   margin-top: 4px;
   text-align: right;
@@ -234,14 +251,14 @@ button:hover {
   background: #5846d6;
 }
 
+
+
 .toggle-btn {
-  position: fixed;
-  top: 16px; /* 상단에서 16px */
-  right: 16px; /* 오른쪽에서 16px */
+  margin-left: auto; /* 오른쪽 정렬 */
+  padding: 8px 10px;
   background: transparent;
   color: white;
-  border: 1px solid white;
-  padding: 5px 10px;
+  /* border: 1px solid white; */
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
@@ -252,9 +269,26 @@ button:hover {
   color: var(--header-bg);
 }
 
+/* .new-chat-btn {
+  margin-left: 10px;
+  padding: 8px 12px;
+  background: var(--header-bg);
+  color: white;
+  border: 1px solid white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.new-chat-btn:hover {
+  background: white;
+  color: var(--header-bg);
+} */
+
 .message-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: 15px;
 }
 
@@ -272,6 +306,11 @@ button:hover {
   flex-shrink: 0;
 }
 
+.avatar .icon {
+  width: 24px;
+  height: 24px;
+}
+
 .user-avatar {
   background: linear-gradient(to bottom right, #f06292, #4fc3f7); 
 }
@@ -279,6 +318,35 @@ button:hover {
 .assistant-avatar {
   background: linear-gradient(to bottom right, #64b5f6, #3f51b5); 
 }
+
+
+.chat-container.light {
+  --background-color: #ffffff; /* 밝은 보라색 배경 */
+  --text-color: #333; /* 어두운 텍스트 */
+  --header-bg: #5e4cc9; /* 헤더의 연한 보라색 */
+  --user-bg: #f4f3fc; /* 사용자 메시지의 부드러운 배경 */
+  --assistant-bg: #ffffff; /* Bot 메시지의 부드러운 보라색 */
+}
+
+.chat-container.dark {
+  --background-color: #1e1e2e; /* 어두운 배경 */
+  --text-color: #e0e0e0; /* 텍스트 색상 */
+  --header-bg: #2e2e4a; /* 헤더의 어두운 톤 */
+  --user-bg: #3b3a50; /* 사용자 메시지 배경 */
+  --assistant-bg: #2f2e46; /* Bot 메시지 배경 */
+}
+
+.new-chat-btn {
+  background: transparent;
+  color: white; /* 버튼 텍스트 흰색 */
+  font-size: 14px;
+}
+
+.new-chat-btn:hover {
+  background: white;
+  color: var(--header-bg);
+}
+
 
 
 </style>
